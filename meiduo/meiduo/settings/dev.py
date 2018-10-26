@@ -194,9 +194,10 @@ REST_FRAMEWORK = {
     # 异常处理
     'EXCEPTION_HANDLER': 'meiduo.utils.exceptions.exception_handler',
 }
+# 自定义的模型需要指定才能加入用户认证
 AUTH_USER_MODEL = 'users.User'
 
-# CORS
+# CORS白名单
 CORS_ORIGIN_WHITELIST = (
     '127.0.0.1:8080',
     'localhost:8080',
@@ -204,3 +205,6 @@ CORS_ORIGIN_WHITELIST = (
     'api.meiduo.site:8000'
 )
 CORS_ALLOW_CREDENTIALS = True  # 允许携带cookie
+JWT_AUTH = {
+    "JWT_RESPONSE_PAYLOAD_HANDLER": "users.utils.jwt_response_payload_handler"  # 对ｊｗｔ结果重写
+}
