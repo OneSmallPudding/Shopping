@@ -11,10 +11,11 @@ class UserSerialziers(serializers.ModelSerializer):
     password2 = serializers.CharField(max_length=20, min_length=8, write_only=True)
     sms_code = serializers.CharField(max_length=6, min_length=6, write_only=True)
     allow = serializers.CharField(write_only=True)
+    token = serializers.CharField(read_only=True)
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'mobile', 'email', 'password', 'password2', 'sms_code', 'allow']
+        fields = ['id', 'username', 'mobile', 'email', 'password', 'password2', 'sms_code', 'allow', "token"]
         extra_kwargs = {
             'password': {
                 'write_only': True,
@@ -35,7 +36,7 @@ class UserSerialziers(serializers.ModelSerializer):
 
     def validate_mobile(self, value):
         if not re.match(r"^1[3-9]\d{9}$", value):
-            raise  serializers.ValidationError("手机号格式不正确")
+            raise serializers.ValidationError("手机号格式不正确")
         return value
 
     def validate_allow(self, value):
@@ -61,6 +62,14 @@ class UserSerialziers(serializers.ModelSerializer):
         del validated_data["sms_code"]
         print(validated_data)
 
-        user=User.objects.create_user(username=validated_data['username'], mobile=validated_data['mobile'],
-                                 password=validated_data['password'])
+        user = User.objects.create_user(username=validated_data['username'], mobile=validated_data['mobile'],
+                                        password=validated_data['password'])
+        from rest_framework_jwt.settings import api_settings
+
+        jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+        jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+
+        payload = jwt_payload_handler(user)
+        token = jwt_encode_handler(payload)
+        user.token = token
         return user
