@@ -41,6 +41,7 @@ INSTALLED_APPS = [
 
     "rest_framework",
     "users.apps.UsersConfig",
+    "oauth.apps.OauthConfig",
     'corsheaders',
 ]
 
