@@ -1,4 +1,6 @@
 from random import randint
+
+from django.conf import settings
 from django.shortcuts import render
 # Create your views here.
 from django_redis import get_redis_connection
@@ -69,3 +71,28 @@ class EmailView(UpdateAPIView):
 
     def get_object(self):
         return self.request.user
+
+
+class VerifyEmailView(APIView):
+    '''验证邮箱'''
+
+    def get(self, request):
+        token = request.query_params.get("token")
+        if not token:
+            return Response({"errors": "token过期"})
+        from itsdangerous import TimedJSONWebSignatureSerializer as tjs
+        tjs = tjs(settings.SECRET_KEY, 300)
+        try:
+            data = tjs.loads(token)
+        except:
+            return Response({"errors": "token不正确"})
+        id = data["id"]
+        try:
+            user = User.objects.get(id=id)
+        except:
+            return Response({"errors": "ｔｏｎｋｅｎ数据不对"})
+        if not user:
+            return Response({"errors": "无效"})
+        user.email_active = True
+        user.save()
+        return Response({"message": "ok"})
