@@ -23,17 +23,20 @@ class QQAuthURLView(APIView):
         qq = OAuthQQ(client_id=settings.QQ_CLIENT_ID, client_secret=settings.QQ_CLIENT_SECRET,
                      redirect_uri=settings.QQ_REDIRECT_URI, state=state)
         login_url = qq.get_qq_url()
+        print(login_url)
+
         return Response({"login_url": login_url})
 
 
 class QQAuthUserView(CreateAPIView):
+    '''生产ｏｐｅｎｉｄ和绑定用户'''
     serializer_class = QQAuthUserSerializer
 
     def get(self, request):
         # 获取ｃｏｄｅ
         code = request.query_params.get("code")
         if not code:
-            return Response({"errors":"没有ｃｏｄｅ"})
+            return Response({"errors": "没有ｃｏｄｅ"})
 
         # 得到ｏｐｅｎｉｄ
         oauth = OAuthQQ(client_id=settings.QQ_CLIENT_ID, client_secret=settings.QQ_CLIENT_SECRET,
@@ -45,11 +48,11 @@ class QQAuthUserView(CreateAPIView):
         try:
             qq_user = OAuthQQUser.objects.get(openid=openid)
         except:
-        # 用户没绑定
+            # 用户没绑定
             from itsdangerous import TimedJSONWebSignatureSerializer as tjs
-            tjs = tjs(settings.SECRET_KEY,300)
-            data = tjs.dumps({"openid":openid})
-            return Response({"access_token":data})
+            tjs = tjs(settings.SECRET_KEY, 300)
+            data = tjs.dumps({"openid": openid})
+            return Response({"access_token": data})
         else:
             # 用户绑定过
             user = qq_user.user

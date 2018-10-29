@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/1.11/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
-
+import datetime
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -208,11 +208,13 @@ CORS_ORIGIN_WHITELIST = (
     '127.0.0.1:8080',
     'localhost:8080',
     'www.meiduo.site:8080',
+    # 'www.meiduo.site:8000',
     'api.meiduo.site:8000'
 )
 CORS_ALLOW_CREDENTIALS = True  # 允许携带cookie
 JWT_AUTH = {
-    "JWT_RESPONSE_PAYLOAD_HANDLER": "users.utils.jwt_response_payload_handler"  # 对ｊｗｔ结果重写
+    "JWT_RESPONSE_PAYLOAD_HANDLER": "users.utils.jwt_response_payload_handler",  # 对ｊｗｔ结果重写
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=100000),
 }
 AUTHENTICATION_BACKENDS = [
     'users.utils.UsernameMobileAuthBackend',
@@ -221,3 +223,17 @@ AUTHENTICATION_BACKENDS = [
 QQ_CLIENT_ID = '101474184'
 QQ_CLIENT_SECRET = 'c6ce949e04e12ecc909ae6a8b09b637c'
 QQ_REDIRECT_URI = 'http://www.meiduo.site:8080/oauth_callback.html'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.qq.com'
+
+EMAIL_USE_TLS = True  # qq邮箱为True
+EMAIL_PORT = 25  # 端口号可能有问题，换端口号
+# 发送邮件的邮箱
+# EMAIL_HOST_USER = 'meiduo<itcast88@qq.com>'
+EMAIL_HOST_USER = '978862522@qq.com'
+# 在邮箱中设置的客户端授权密码
+EMAIL_HOST_PASSWORD = 'nwfloitxmpatbfbc'
+# 收件人看到的发件人
+EMAIL_FROM = '978862522@qq.com'
+# EMAIL_FROM = 'meiduo<itcast88@qq.com>'

@@ -1,8 +1,11 @@
 import re
 
+from django.conf import settings
+from django.core.mail import send_mail
 from django_redis import get_redis_connection
 from rest_framework import serializers
 
+from celery_tasks.email.tasks import send_email
 from users.models import User
 
 
@@ -80,4 +83,23 @@ class UserDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'mobile', ]
+        fields = ['id', 'username', 'mobile', "email"]
+
+
+class EmailSerializer(serializers.ModelSerializer):
+    '''邮箱修改'''
+
+    class Meta:
+        model = User
+        fields = ["email"]
+
+    def update(self, instance, validated_data):
+        from itsdangerous import TimedJSONWebSignatureSerializer as tjs
+        tjs = tjs(settings.SECRET_KEY, 300)
+        token = tjs.dumps({"id": instance.id}).decode()
+        to_email = validated_data["email"]
+        verify_url = 'http://www.meiduo.site:8080/success_verify_email.html?token=' + token
+        send_email.delay(to_email, verify_url)
+        # send_mail('biaoti', 'yanzheng', settings.EMAIL_FROM, [validated_data['email']])
+        super().update(instance, validated_data)
+        return instance
