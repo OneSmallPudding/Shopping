@@ -5,14 +5,15 @@ from rest_framework.generics import ListAPIView
 
 from areas.models import Area
 from areas.serializers import AreaSerializer
+from rest_framework_extensions.cache.mixins import CacheResponseMixin
 
 
-class AreaViewSet(ListAPIView):
+class AreaViewSet(CacheResponseMixin, ListAPIView):
     queryset = Area.objects.filter(parent=None)
     serializer_class = AreaSerializer
 
 
-class AreasViewSet(ListAPIView):
+class AreasViewSet(CacheResponseMixin, ListAPIView):
     serializer_class = AreaSerializer
 
     def get_queryset(self):

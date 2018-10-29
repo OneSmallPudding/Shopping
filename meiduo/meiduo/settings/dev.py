@@ -238,3 +238,12 @@ EMAIL_HOST_PASSWORD = 'nwfloitxmpatbfbc'
 # 收件人看到的发件人
 EMAIL_FROM = '978862522@qq.com'
 # EMAIL_FROM = 'meiduo<itcast88@qq.com>'
+
+
+# DRF扩展缓存
+REST_FRAMEWORK_EXTENSIONS = {
+    # 缓存时间
+    'DEFAULT_CACHE_RESPONSE_TIMEOUT': 60 * 60,
+    # 缓存存储
+    'DEFAULT_USE_CACHE': 'default',
+}
