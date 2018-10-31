@@ -2,7 +2,7 @@ from django.conf.urls import url
 from rest_framework_jwt.views import obtain_jwt_token
 
 from users.views import SMSCodeView, UserNameCountView, MobileCountView, UserView, UserDetailView, EmailView, \
-    VerifyEmailView
+    VerifyEmailView, AddressViewSet, StatusView
 
 urlpatterns = [
     url(r"^sms_codes/(?P<mobile>1[3-9]\d{9})/$", SMSCodeView.as_view()),
@@ -13,4 +13,7 @@ urlpatterns = [
     url(r"^user/$", UserDetailView.as_view()),
     url(r"^emails/$", EmailView.as_view()),
     url(r"^emails/verification/$", VerifyEmailView.as_view()),
+    url(r"^addresses/$", AddressViewSet.as_view()),
+    url(r"^addresses/(?P<pk>\d+)/$", AddressViewSet.as_view()),
+    url(r"^addresses/(?P<pk>\d+)/status/$", StatusView.as_view()),
 ]

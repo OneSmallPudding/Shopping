@@ -4,12 +4,12 @@ from django.conf import settings
 from django.shortcuts import render
 # Create your views here.
 from django_redis import get_redis_connection
-from rest_framework.generics import CreateAPIView, RetrieveAPIView, UpdateAPIView
+from rest_framework.generics import CreateAPIView, RetrieveAPIView, UpdateAPIView, ListCreateAPIView, GenericAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from celery_tasks.sms.tasks import send_sms_code
-from users.models import User
-from users.serializers import UserSerialziers, UserDetailSerializer, EmailSerializer
+from users.models import User, Address
+from users.serializers import UserSerialziers, UserDetailSerializer, EmailSerializer, UserAddressSerializer
 
 
 class SMSCodeView(APIView):
@@ -96,3 +96,29 @@ class VerifyEmailView(APIView):
         user.email_active = True
         user.save()
         return Response({"message": "ok"})
+
+
+class AddressViewSet(ListCreateAPIView, UpdateAPIView):
+    '''用户收货地址管理'''
+    serializer_class = UserAddressSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        return Address.objects.filter(user=user, is_deleted=False)
+
+    def delete(self, request, pk):
+        address = Address.objects.get(pk=pk)
+        address.is_deleted = True
+        address.save()
+        return Response({"errmsg": "ok"})
+
+
+class StatusView(APIView):
+
+    def put(self, requset, pk):
+        user = requset.user
+        user.default_address_id = pk
+        user.save()
+        address = Address.objects.get(pk=pk)
+        ser = UserAddressSerializer(address)
+        return Response(ser.data)

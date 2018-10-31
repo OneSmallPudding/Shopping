@@ -6,7 +6,7 @@ from django_redis import get_redis_connection
 from rest_framework import serializers
 
 from celery_tasks.email.tasks import send_email
-from users.models import User
+from users.models import User, Address
 
 
 class UserSerialziers(serializers.ModelSerializer):
@@ -103,3 +103,27 @@ class EmailSerializer(serializers.ModelSerializer):
         # send_mail('biaoti', 'yanzheng', settings.EMAIL_FROM, [validated_data['email']])
         super().update(instance, validated_data)
         return instance
+
+
+class UserAddressSerializer(serializers.ModelSerializer):
+    province = serializers.StringRelatedField(read_only=True)
+    city = serializers.StringRelatedField(read_only=True)
+    district = serializers.StringRelatedField(read_only=True)
+    province_id = serializers.IntegerField(label='省ID', required=True)
+    city_id = serializers.IntegerField(label='市ID', required=True)
+    district_id = serializers.IntegerField(label='区ID', required=True)
+
+    class Meta:
+        model = Address
+        exclude = ("user",)
+
+    def validate_mobile(self, value):
+        if not re.match(r'^1[3-9]\d{9}$', value):
+            raise serializers.ValidationError('手机号格式错误')
+        return value
+
+    def create(self, validated_data):
+        validated_data["user"] = self.context["request"].user
+        return super(UserAddressSerializer, self).create(validated_data)
+
+
