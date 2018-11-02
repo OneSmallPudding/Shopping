@@ -25,6 +25,8 @@ class SKUListView(ListAPIView):
 
 
 class GoodCategorieView(APIView):
+    '''面包屑导航'''
+
     def get(self, request, pk):
         cat3 = GoodsCategory.objects.get(pk=pk)
         cat2 = cat3.parent
