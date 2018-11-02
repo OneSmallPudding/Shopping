@@ -42,3 +42,12 @@ def get_categories():
                 cat2.sub_cats.append(cat3)
             categories[group_id]['sub_cats'].append(cat2)
     return categories
+
+
+from rest_framework.pagination import PageNumberPagination
+
+
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 2
+    page_size_query_param = 'page_size'
+    max_page_size = 20
