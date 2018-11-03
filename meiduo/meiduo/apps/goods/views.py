@@ -4,12 +4,12 @@ from django.shortcuts import render
 from drf_haystack.viewsets import HaystackViewSet
 
 from rest_framework.filters import OrderingFilter
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import ListAPIView, CreateAPIView, ListCreateAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from goods.models import SKU, GoodsCategory
-from goods.serializers import SKUSerializer, SKUIndexSerializer
+from goods.serializers import SKUSerializer, SKUIndexSerializer, UserGoodsHistorySerializer
 from goods.utils import StandardResultsSetPagination
 
 
@@ -48,3 +48,19 @@ class SKUSearchViewSet(HaystackViewSet):
 
     serializer_class = SKUIndexSerializer
     pagination_class = StandardResultsSetPagination
+
+
+class UserGoodsHistoryView(ListCreateAPIView):
+    '''保存和获取用户浏览的商品信息'''
+
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return UserGoodsHistorySerializer
+        return SKUSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        from django_redis import get_redis_connection
+        conn = get_redis_connection("history")
+        data_list = conn.lrange("history_%s" % user.id, 0, 5)
+        return SKU.objects.filter(id__in=data_list)
