@@ -7,7 +7,7 @@ from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from carts.serializers import CartSerialzers, CartSKUSerializer, CartDeleteSerialzers
+from carts.serializers import CartSerialzers, CartSKUSerializer, CartDeleteSerialzers, CartSelectionSerialzers
 from goods.models import SKU
 
 
@@ -58,7 +58,7 @@ class CartsView(APIView):
         # '构建相应对象设置加密的ｃｏｏｋｉｅ
         resp = Response({'message': 'ok'})
         cart_cookie = base64.b64encode(pickle.dumps(cart)).decode()
-        resp.set_cookie("cart_cookie", cart_cookie, max_age=3000)
+        resp.set_cookie("cart_cookie", cart_cookie, max_age=30000000)
         return resp
 
     def get(self, request):
@@ -83,7 +83,10 @@ class CartsView(APIView):
         else:
 
             cart_cookie = request.COOKIES.get("cart_cookie")
-            cart = pickle.loads(base64.b64decode(cart_cookie))
+            if not cart_cookie:
+                cart = {}
+            else:
+                cart = pickle.loads(base64.b64decode(cart_cookie))
         skus = SKU.objects.filter(id__in=cart.keys())
         for sku in skus:
             sku.count = cart[sku.id]['count']
@@ -169,6 +172,53 @@ class CartsView(APIView):
         if sku_id in cart.keys():
             del cart[sku_id]
             # '构建相应对象设置加密的ｃｏｏｋｉｅ
+        resp = Response({'message': 'ok'})
+        cart_cookie = base64.b64encode(pickle.dumps(cart)).decode()
+        resp.set_cookie("cart_cookie", cart_cookie, max_age=3000)
+        return resp
+
+
+class CartSelectionView(APIView):
+    '''购物车的全选'''
+
+    # 对前段发送的ｔｏｋｅｎ数据时会进行验证
+    def perform_authentication(self, request):
+        pass
+
+    def put(self, request):
+        # 获取数据
+        data = request.data
+        # 进行序列化验证
+        ser = CartSelectionSerialzers(data=data)
+        ser.is_valid()
+        # 序列话的数据
+        data = ser.data
+        selected = data["selected"]
+        # 判断用户是否存在
+        try:
+            user = request.user
+            # 用户登陆
+        except:
+            # 用户没登录
+            user = None
+        if user:
+            from django_redis import get_redis_connection
+            conn = get_redis_connection("carts")
+            sku_ids = conn.hkeys('cart_%s' % user.id)
+            if selected:
+                conn.sadd("cart_sele_%s" % user.id, *sku_ids)
+            else:
+                conn.srem("cart_sele_%s" % user.id, *sku_ids)
+            return Response(ser.data)
+        cart = request.COOKIES.get("cart_cookie", None)
+        if cart:
+            cart = pickle.loads(base64.b64decode(cart))
+        else:
+            cart = {}
+        for sku_id in cart.keys():
+            cart[sku_id]['selected'] = selected
+
+        # '构建相应对象设置加密的ｃｏｏｋｉｅ
         resp = Response({'message': 'ok'})
         cart_cookie = base64.b64encode(pickle.dumps(cart)).decode()
         resp.set_cookie("cart_cookie", cart_cookie, max_age=3000)

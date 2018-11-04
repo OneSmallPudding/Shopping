@@ -32,3 +32,6 @@ class CartDeleteSerialzers(serializers.Serializer):
         except:
             raise serializers.ValidationError("sku_id不正确")
         return attrs
+
+class CartSelectionSerialzers(serializers.Serializer):
+    selected = serializers.BooleanField(default=True, label="是否勾选")
