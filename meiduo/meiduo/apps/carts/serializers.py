@@ -23,3 +23,12 @@ class CartSKUSerializer(serializers.ModelSerializer):
     class Meta:
         model = SKU
         fields = ('id', 'count', 'name', 'default_image_url', 'price', 'selected')
+
+class CartDeleteSerialzers(serializers.Serializer):
+    sku_id = serializers.IntegerField(min_value=1)
+    def validate(self, attrs):
+        try:
+            SKU.objects.get(pk=attrs["sku_id"])
+        except:
+            raise serializers.ValidationError("sku_id不正确")
+        return attrs
