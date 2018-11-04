@@ -9,11 +9,13 @@ from rest_framework_extensions.cache.mixins import CacheResponseMixin
 
 
 class AreaViewSet(CacheResponseMixin, ListAPIView):
+    '''所有的省级信息'''
     queryset = Area.objects.filter(parent=None)
     serializer_class = AreaSerializer
 
 
 class AreasViewSet(CacheResponseMixin, ListAPIView):
+    '''所有的市区信息'''
     serializer_class = AreaSerializer
 
     def get_queryset(self):

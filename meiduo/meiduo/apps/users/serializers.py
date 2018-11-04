@@ -125,5 +125,3 @@ class UserAddressSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data["user"] = self.context["request"].user
         return super(UserAddressSerializer, self).create(validated_data)
-
-

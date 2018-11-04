@@ -102,6 +102,12 @@ class AddressViewSet(ListCreateAPIView, UpdateAPIView):
     '''用户收货地址管理'''
     serializer_class = UserAddressSerializer
 
+    def get(self, request, *args, **kwargs):
+        query_set = self.get_queryset()
+        serializer = UserAddressSerializer(query_set, many=True)
+        default_address_id = request.user.default_address_id
+        return Response({"default_address_id": default_address_id, "address": serializer.data})
+
     def get_queryset(self):
         user = self.request.user
         return Address.objects.filter(user=user, is_deleted=False)
@@ -114,6 +120,7 @@ class AddressViewSet(ListCreateAPIView, UpdateAPIView):
 
 
 class StatusView(APIView):
+    '''默认地址'''
 
     def put(self, requset, pk):
         user = requset.user
