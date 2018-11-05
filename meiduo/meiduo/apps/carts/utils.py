@@ -14,7 +14,7 @@ def merge_cart_cookie_to_redis(reqeust, response, user):
     except:
         return Response({"errors": "cart_cookie不正确"})
     if not cart:
-        return Response({"errors": "cart_cookie不正确"})
+        return response
     cart_dict = {}
     cart_list = []
     cart_delete_list = []
