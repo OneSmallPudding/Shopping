@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_jwt.settings import api_settings
 
+from carts.utils import merge_cart_cookie_to_redis
 from oauth.models import OAuthQQUser
 from oauth.serializers import QQAuthUserSerializer
 
@@ -62,8 +63,10 @@ class QQAuthUserView(CreateAPIView):
 
             payload = jwt_payload_handler(user)
             token = jwt_encode_handler(payload)
-            return Response({
+            response = Response({
                 "token": token,
                 "user_id": user.id,
                 "username": user.username
             })
+            response = merge_cart_cookie_to_redis(request, response, user)
+            return response
