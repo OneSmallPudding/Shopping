@@ -7,6 +7,9 @@ from django_redis import get_redis_connection
 from rest_framework.generics import CreateAPIView, RetrieveAPIView, UpdateAPIView, ListCreateAPIView, GenericAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_jwt.views import ObtainJSONWebToken
+
+from carts.utils import merge_cart_cookie_to_redis
 from celery_tasks.sms.tasks import send_sms_code
 from users.models import User, Address
 from users.serializers import UserSerialziers, UserDetailSerializer, EmailSerializer, UserAddressSerializer
@@ -129,3 +132,17 @@ class StatusView(APIView):
         address = Address.objects.get(pk=pk)
         ser = UserAddressSerializer(address)
         return Response(ser.data)
+
+
+class UserLoginView(ObtainJSONWebToken):
+    '''重写登陆验证'''
+
+    def post(self, request, *args, **kwargs):
+        response = super(UserLoginView, self).post(request, *args, **kwargs)
+        serializer = self.get_serializer(data=request.data)
+
+        if serializer.is_valid():
+            user = serializer.object.get('user') or request.user
+            # 合并购物车
+            response = merge_cart_cookie_to_redis(request, response, user)
+        return response
