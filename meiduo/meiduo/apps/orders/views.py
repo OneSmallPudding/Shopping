@@ -1,12 +1,12 @@
 from django.shortcuts import render
 
 # Create your views here.
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import ListAPIView, CreateAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from goods.models import SKU
-from orders.serializers import OrdersSerializer
+from orders.serializers import OrdersSerializer, SaveOrderSerializer
 
 
 # class OrderView(ListAPIView):
@@ -48,3 +48,9 @@ class OrderView(APIView):
         serializer = OrdersSerializer(skus, many=True)
 
         return Response({"freight": freight, "skus": serializer.data})
+
+
+class SaveOrderView(CreateAPIView):
+    '''保存订单'''
+
+    serializer_class = SaveOrderSerializer

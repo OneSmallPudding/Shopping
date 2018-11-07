@@ -63,4 +63,8 @@ class UserGoodsHistoryView(ListCreateAPIView):
         from django_redis import get_redis_connection
         conn = get_redis_connection("history")
         data_list = conn.lrange("history_%s" % user.id, 0, 5)
-        return SKU.objects.filter(id__in=data_list)
+        skus = []
+        for data in data_list:
+            sku = SKU.objects.get(id=data)
+            skus.append(sku)
+        return skus
