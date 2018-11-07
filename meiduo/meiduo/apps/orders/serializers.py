@@ -117,5 +117,5 @@ class SaveOrderSerializer(serializers.ModelSerializer):
                 # 删除hash
                 conn.hdel('cart_%s' % user.id, *sku_ids)
                 # 删除集合
-                conn.srem('cart_selseted_%s' % user.id, sku_ids)
+                conn.srem('cart_selseted_%s' % user.id, *sku_ids)
                 return order

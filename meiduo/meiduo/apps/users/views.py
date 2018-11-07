@@ -59,6 +59,15 @@ class UserView(CreateAPIView):
     '''用户注册'''
     serializer_class = UserSerialziers
 
+    def post(self, request, *args, **kwargs):
+        data = request.data
+        ser = self.get_serializer(data)
+        ser.is_valid()
+        user = ser.save()
+        response = Response(ser.data)
+        response = merge_cart_cookie_to_redis(request, response, user)
+        return response
+
 
 class UserDetailView(RetrieveAPIView):
     '''用户详情'''
