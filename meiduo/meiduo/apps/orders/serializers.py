@@ -88,7 +88,7 @@ class SaveOrderSerializer(serializers.ModelSerializer):
                         # sku.stock = new_stock
                         # sku.sales = new_sales
                         # sku.save()
-                        ret = SKU.objects.filter(id=sku.id, stock=old_sales).update(stock=new_stock, sales=new_sales)
+                        ret = SKU.objects.filter(id=sku.id, stock=old_stock).update(stock=new_stock, sales=new_sales)
                         if ret == 0:
                             continue
                         # 更新ｓｐｕ的总销量
